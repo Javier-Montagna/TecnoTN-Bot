@@ -2,9 +2,6 @@ package jm;
 import robocode.*;
 import java.awt.Color;
 import robocode.ScannedRobotEvent;
-import java.util.Random;
-import java.util.*;
-import static robocode.util.Utils.normalRelativeAngleDegrees;
 import java.awt.geom.Point2D;
 
 public class TecnoTN extends AdvancedRobot
@@ -12,7 +9,6 @@ public class TecnoTN extends AdvancedRobot
 	private AdvancedEnemyBot enemy = new AdvancedEnemyBot();
 	private byte moveDirection = 1;
 	private byte scanDirection = 1;
-	Random r = new Random();
 	/**
 	 * run: TecnoTN's default behavior
 	 */
@@ -28,7 +24,6 @@ public class TecnoTN extends AdvancedRobot
 		enemy.reset();
 	
 		while(true) {
-			//setTurnRadarRight(360);
 			avoidWall();
 			doMove();
 			execute();
@@ -58,11 +53,9 @@ public class TecnoTN extends AdvancedRobot
 	public void doMove() {
 		if (getVelocity() == 0)
 			moveDirection *= -1;
-	
-		// always square off against our enemy
+
 		setTurnRight(enemy.getBearing() + 90);
 		
-		// strafe by changing direction every 20 ticks
 		if (getTime() % 20 == 0) {
 			moveDirection *= -1;
 			setAhead(150 * moveDirection);
@@ -79,18 +72,18 @@ public class TecnoTN extends AdvancedRobot
 	 * onScannedRobot: What to do when you see another robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		if (e.getDistance() < 250) {
-			if (enemy.none()) {
-				enemy.update(e, this);
-			} else if (e.getEnergy() < enemy.getEnergy()) {
+	
+		if (enemy.none()) {
+			enemy.update(e, this);
+		} else if (e.getDistance() < 250) {
+			if (e.getEnergy() < enemy.getEnergy()) {
 				enemy.update(e, this);	
 			} else if (e.getDistance() < enemy.getDistance()) {
 				enemy.update(e, this);
 			}
-		} 
-		
-		if (e.getDistance() <= 600) {
+		} else if (getOthers() == 1 && e.getDistance() < 600) {
 			enemy.update(e, this);
+		}
 			
 		double firePower = Math.min(350 / enemy.getDistance(), 3);
 		double bulletSpeed = 20 - firePower * 3;
@@ -103,9 +96,8 @@ public class TecnoTN extends AdvancedRobot
 		setTurnGunRight(normalizeBearing(absDeg - getGunHeading()));
 		if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10)
 			setFire(firePower);
-		}
 		
-		scanDirection *= -1; // changes value from 1 to -1
+		scanDirection *= -1;
 		setTurnRadarRight(360 * scanDirection);
 	}
 	
