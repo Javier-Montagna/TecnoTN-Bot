@@ -12,6 +12,7 @@ public class TecnoTN extends AdvancedRobot
 	private AdvancedEnemyBot enemy = new AdvancedEnemyBot();
 	private byte moveDirection = 1;
 	private byte scanDirection = 1;
+	Random r = new Random();
 	/**
 	 * run: TecnoTN's default behavior
 	 */
@@ -27,7 +28,7 @@ public class TecnoTN extends AdvancedRobot
 		enemy.reset();
 	
 		while(true) {
-			setTurnRadarRight(360);
+			//setTurnRadarRight(360);
 			avoidWall();
 			doMove();
 			execute();
@@ -60,7 +61,7 @@ public class TecnoTN extends AdvancedRobot
 	
 		// always square off against our enemy
 		setTurnRight(enemy.getBearing() + 90);
-	
+		
 		// strafe by changing direction every 20 ticks
 		if (getTime() % 20 == 0) {
 			moveDirection *= -1;
@@ -88,12 +89,8 @@ public class TecnoTN extends AdvancedRobot
 			}
 		} 
 		
-		if (enemy.none() && e.getDistance() <= 600) {
+		if (e.getDistance() <= 600) {
 			enemy.update(e, this);
-		}
-		
-		scanDirection *= -1; // changes value from 1 to -1
-		setTurnRadarRight(360 * scanDirection);
 			
 		double firePower = Math.min(350 / enemy.getDistance(), 3);
 		double bulletSpeed = 20 - firePower * 3;
@@ -106,6 +103,10 @@ public class TecnoTN extends AdvancedRobot
 		setTurnGunRight(normalizeBearing(absDeg - getGunHeading()));
 		if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10)
 			setFire(firePower);
+		}
+		
+		scanDirection *= -1; // changes value from 1 to -1
+		setTurnRadarRight(360 * scanDirection);
 	}
 	
 	/**
