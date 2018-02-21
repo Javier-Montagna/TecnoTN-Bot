@@ -7,13 +7,13 @@ import java.util.*;
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 import java.awt.geom.Point2D;
 
-public class Montubot extends AdvancedRobot
+public class TecnoTN extends AdvancedRobot
 {
 	private AdvancedEnemyBot enemy = new AdvancedEnemyBot();
 	private byte moveDirection = 1;
 	private byte scanDirection = 1;
 	/**
-	 * run: Montubot's default behavior
+	 * run: TecnoTN's default behavior
 	 */
 	public void run() {
 		// Initialization of the robot should be put here
@@ -58,8 +58,14 @@ public class Montubot extends AdvancedRobot
 		if (getVelocity() == 0)
 			moveDirection *= -1;
 	
+		// always square off against our enemy
 		setTurnRight(enemy.getBearing() + 90);
-		setAhead(150 * moveDirection);
+	
+		// strafe by changing direction every 20 ticks
+		if (getTime() % 20 == 0) {
+			moveDirection *= -1;
+			setAhead(150 * moveDirection);
+		}
 	}
 
 	private double normalizeBearing(double angle) {
@@ -72,7 +78,7 @@ public class Montubot extends AdvancedRobot
 	 * onScannedRobot: What to do when you see another robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		if (e.getDistance() < 350) {
+		if (e.getDistance() < 250) {
 			if (enemy.none()) {
 				enemy.update(e, this);
 			} else if (e.getEnergy() < enemy.getEnergy()) {
@@ -80,23 +86,26 @@ public class Montubot extends AdvancedRobot
 			} else if (e.getDistance() < enemy.getDistance()) {
 				enemy.update(e, this);
 			}
-			scanDirection *= -1; // changes value from 1 to -1
-			setTurnRadarRight(360 * scanDirection);
+		} 
+		
+		if (enemy.none() && e.getDistance() <= 600) {
+			enemy.update(e, this);
+		}
+		
+		scanDirection *= -1; // changes value from 1 to -1
+		setTurnRadarRight(360 * scanDirection);
 			
-			double firePower = Math.min(350 / enemy.getDistance(), 3);
-			double bulletSpeed = 20 - firePower * 3;
-			long time = (long)(enemy.getDistance() / bulletSpeed);
+		double firePower = Math.min(350 / enemy.getDistance(), 3);
+		double bulletSpeed = 20 - firePower * 3;
+		long time = (long)(enemy.getDistance() / bulletSpeed);
 			
-			double futureX = enemy.getFutureX(time);
-			double futureY = enemy.getFutureY(time);
-			double absDeg = absoluteBearing(getX(), getY(), futureX, futureY);
+		double futureX = enemy.getFutureX(time);
+		double futureY = enemy.getFutureY(time);
+		double absDeg = absoluteBearing(getX(), getY(), futureX, futureY);
 
-			setTurnGunRight(normalizeBearing(absDeg - getGunHeading()));
-			if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10)
-				setFire(firePower);
-		} else {
-			enemy.reset();
-		}	
+		setTurnGunRight(normalizeBearing(absDeg - getGunHeading()));
+		if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10)
+			setFire(firePower);
 	}
 	
 	/**
@@ -109,10 +118,10 @@ public class Montubot extends AdvancedRobot
 	}
 	
 	private boolean avoidWall() {
-        if( getBattleFieldHeight() - getY() < 150 || getY() < 150 ||
-            getBattleFieldWidth() - getX() < 150 || getX() < 150) {
+        if( getBattleFieldHeight() - getY() < 300 || getY() < 300 ||
+            getBattleFieldWidth() - getX() < 300 || getX() < 300) {
                 turnRight(90);
-				ahead(30);
+				ahead(200);
                 return true;
             }
         return false;
